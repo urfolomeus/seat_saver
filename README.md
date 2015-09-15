@@ -164,7 +164,7 @@ The demo app is a basic seat reservation system, like you'd use to book a seat o
 
 With those changes made you should see something like this:
 
-  ![](https://www.dropbox.com/s/tidr8ucql49h535/Screenshot%202015-09-15%2020.06.57.png?dl=0)
+  ![Moar Elm](https://www.dropbox.com/s/tidr8ucql49h535/Screenshot%202015-09-15%2020.06.57.png?dl=0)
 
 
 ## 5. Building a basic seat API in Phoenix
@@ -231,4 +231,18 @@ Rather than hardwire the seats we want to get them from the database. We'll star
 
 6. Run `mix run priv/repo/seeds.exs` to apply the seeds and then fire up the Phoenix server (if you don't already have it running). You should see the following at [http://localhost:4000/api/seats](http://localhost:4000/api/seats)
 
-  !{}(https://www.dropbox.com/s/kbsox5gof0b8ikr/Screenshot%202015-09-15%2020.30.32.png?dl=0)
+  ![Data API](https://www.dropbox.com/s/kbsox5gof0b8ikr/Screenshot%202015-09-15%2020.30.32.png?dl=0)
+
+
+## 6. Sending the initial seat data to the Elm app
+
+> This part is one where I've tried a few options and I'm not really happy with any of them. Basically I want to be able to start with the application showing the current state of the seats within the database. I'll then be using channels to reserve and unreserve seats so, once open, the application should update in real time across all users. Getting this initial state in has been a bit of an issue. I've tried pulling the data directly in Elm using elm-http but I can't seem to find out how to get this to happen on initializing the app, only when I take an action like click a button. Some more reading required I guess!
+> If you happen to find out how to do that, please let me know! :)
+
+We'll implement the initial loading of seat data by setting up an incoming port in Elm, making an AJAX request within *web/static/js/app.js* and then sending the resulting JSON data over the port to Elm. Ports allow you to send data between Elm and JavaScript. We'll send any errors to the browser console for now.
+
+See the diff for the details.
+
+You should now see the following in your browser:
+
+![Getting initial seats via ports](https://www.dropbox.com/s/1zkyptjr84znfl7/Screenshot%202015-09-15%2020.56.32.png?dl=0)
