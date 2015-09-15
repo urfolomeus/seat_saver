@@ -246,3 +246,56 @@ See the diff for the details.
 You should now see the following in your browser:
 
 ![Getting initial seats via ports](https://www.dropbox.com/s/1zkyptjr84znfl7/Screenshot%202015-09-15%2020.56.32.png?dl=0)
+
+
+## 7. Adding Phoenix channels - part 1
+
+What's the point of all this FRP goodness on the Elm side if we can't take advantage with some real time goodness on the Phoenix side?
+
+1. Use the mix generators to create a quick scaffold for the seats channel.
+
+  ```bash
+  mix phoenix.gen.channel Seat seats
+  ```
+
+2. Add the given channel line to *web/channels/user_socket.ex*.
+
+  ```elixir
+  defmodule SeatSaver.UserSocket do
+    use Phoenix.Socket
+
+    ## Channels
+    # channel "rooms:*", SeatSaver.RoomChannel
+    channel "seats:lobby", SeatSaver.SeatChannel
+
+    ...
+  end
+  ```
+
+3. And run `mix test` again to make sure we've not broken anything (should be 17 passing tests).
+
+4. Change the *web/channels/seat_channel.ex* file to the following:
+
+  ```elixir
+  defmodule SeatSaver.SeatChannel do
+    use SeatSaver.Web, :channel
+
+    def join("seats:planner", payload, socket) do
+      {:ok, socket}
+    end
+  end
+  ```
+
+5. Change lines 54-57 of the *web/static/js/socket.js* file to the following:
+
+  ```javascript
+  socket.connect()
+
+  // Now that you are connected, you can join channels with a topic:
+  let channel = socket.channel("seats:planner", {})
+  ```
+
+6. Now uncomment the `import socket from "./socket"` line in *web/static/js/app.js* to enable sockets on the JavaScript side.
+7. Visiting [http://localhost:4000](http://localhost:4000) again, it should look like this.
+
+  ![](https://www.dropbox.com/s/56dtikvikp3yy9e/Screenshot%202015-09-15%2021.37.49.png?dl=0)
