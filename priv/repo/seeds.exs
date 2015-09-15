@@ -9,3 +9,6 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
+SeatSaver.Repo.insert!(%SeatSaver.Seat{seat_no: 1, occupied: false})
+SeatSaver.Repo.insert!(%SeatSaver.Seat{seat_no: 2, occupied: false})
+SeatSaver.Repo.insert!(%SeatSaver.Seat{seat_no: 3, occupied: false})

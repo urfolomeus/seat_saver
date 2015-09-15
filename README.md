@@ -165,3 +165,70 @@ The demo app is a basic seat reservation system, like you'd use to book a seat o
 With those changes made you should see something like this:
 
   ![](https://www.dropbox.com/s/tidr8ucql49h535/Screenshot%202015-09-15%2020.06.57.png?dl=0)
+
+
+## 5. Building a basic seat API in Phoenix
+
+Rather than hardwire the seats we want to get them from the database. We'll start by creating a simple data API in the Phoenix app.
+
+1. Use the built-in Phoenix mix tasks to build a seats endpoint.
+
+  ```bash
+  mix phoenix.gen.json Seat seats seat_no:integer occupied:boolean
+  ```
+
+2. Now follow the instructions it gives and make the following adjustment to the *web/router.ex* file
+
+  ```elixir
+  defmodule SeatSaver.Router do
+    use SeatSaver.Web, :router
+
+    ...
+
+    # Other scopes may use custom stacks.
+    scope "/api", SeatSaver do
+      pipe_through :api
+
+      resources "/seats", SeatController, except: [:new, :edit]
+    end
+  end
+  ```
+
+3. Migrate the database and run the tests to make sure that nothing is broken (you should have 14 passing tests).
+
+  ```bash
+  mix ecto.migrate
+  mix test
+  ```
+
+4. Let's make a couple of tweaks to make things a bit easier on ourselves. Change `seat_no` to `seatNo` in *web/views/seat_view.ex* and *test/controllers/seat_controller_test.exs* as follows:
+
+  ```elixir
+  # web/views/seat_view.ex:12
+  def render("seat.json", %{seat: seat}) do
+    %{id: seat.id,
+      seatNo: seat.seat_no,
+      occupied: seat.occupied}
+  end
+
+  # test/controllers/seat_controller_text.exs:18
+  test "shows chosen resource", %{conn: conn} do
+    seat = Repo.insert! %Seat{}
+    conn = get conn, seat_path(conn, :show, seat)
+    assert json_response(conn, 200)["data"] == %{"id" => seat.id,
+      "seatNo" => seat.seat_no,
+      "occupied" => seat.occupied}
+  end
+  ```
+
+5. Now we need to add some seat data. We can use the *priv/repo/seeds.exs* file for this. Add the following to end of that file:
+
+  ```elixir
+  SeatSaver.Repo.insert!(%SeatSaver.Seat{seat_no: 1, occupied: false})
+  SeatSaver.Repo.insert!(%SeatSaver.Seat{seat_no: 2, occupied: false})
+  SeatSaver.Repo.insert!(%SeatSaver.Seat{seat_no: 3, occupied: false})
+  ```
+
+6. Run `mix run priv/repo/seeds.exs` to apply the seeds and then fire up the Phoenix server (if you don't already have it running). You should see the following at [http://localhost:4000/api/seats](http://localhost:4000/api/seats)
+
+  !{}(https://www.dropbox.com/s/kbsox5gof0b8ikr/Screenshot%202015-09-15%2020.30.32.png?dl=0)
