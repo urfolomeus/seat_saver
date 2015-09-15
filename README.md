@@ -155,3 +155,13 @@ You should see something like this:
 
 I decided to cut away some of the cruft to make it easier to see what was going on. See the diff for details.
 
+
+## 4.Expanding Elm a bit
+
+Now we put our basic app structure in place in *web/elm/SeatSaver.elm*. See the diff for details.
+
+The demo app is a basic seat reservation system, like you'd use to book a seat on a flight. We've defined a Seat type to represent the seat and whether or not it is occupied. For now we just create an initialModel with two seats so that we can see that everything is wired together correctly. We then have a simple View that displays the string representation of each seat in an unordered list. The main function pipes the model to the view.
+
+With those changes made you should see something like this:
+
+  ![](https://www.dropbox.com/s/tidr8ucql49h535/Screenshot%202015-09-15%2020.06.57.png?dl=0)
