@@ -39,7 +39,7 @@ iex -S mix phoenix.server
 
 You should see something like this:
 
-![Phoenix start page](https://www.dropbox.com/s/18lpc1gxl8cw8kb/Screenshot%202015-09-15%2019.07.20.png?dl=0)
+![Phoenix start page](http://i.imgur.com/DYDYlJL.png)
 
 
 ## 2. Adding Elm
@@ -148,7 +148,7 @@ You should see something like this:
 
 11. If you point your browser to [http://localhost:4000](http://localhost:4000) now you should see something like this:
 
-  ![Phoenix with Elm](https://www.dropbox.com/s/wv52p28uy7g73k3/Screenshot%202015-09-15%2019.48.30.png?dl=0)
+  ![Phoenix with Elm](http://i.imgur.com/SuZIMwD.png)
 
 
 ## 3. Simplifying the Phoenix templates
@@ -164,7 +164,7 @@ The demo app is a basic seat reservation system, like you'd use to book a seat o
 
 With those changes made you should see something like this:
 
-  ![Moar Elm](https://www.dropbox.com/s/tidr8ucql49h535/Screenshot%202015-09-15%2020.06.57.png?dl=0)
+  ![Moar Elm](http://i.imgur.com/SH9AeKR.png)
 
 
 ## 5. Building a basic seat API in Phoenix
@@ -231,7 +231,7 @@ Rather than hardwire the seats we want to get them from the database. We'll star
 
 6. Run `mix run priv/repo/seeds.exs` to apply the seeds and then fire up the Phoenix server (if you don't already have it running). You should see the following at [http://localhost:4000/api/seats](http://localhost:4000/api/seats)
 
-  ![Data API](https://www.dropbox.com/s/kbsox5gof0b8ikr/Screenshot%202015-09-15%2020.30.32.png?dl=0)
+  ![Data API](http://i.imgur.com/5qUC0Nl.png)
 
 
 ## 6. Sending the initial seat data to the Elm app
@@ -245,7 +245,7 @@ See the diff for the details.
 
 You should now see the following in your browser:
 
-![Getting initial seats via ports](https://www.dropbox.com/s/1zkyptjr84znfl7/Screenshot%202015-09-15%2020.56.32.png?dl=0)
+![Getting initial seats via ports](http://i.imgur.com/gbzIr8b.png)
 
 
 ## 7. Adding Phoenix channels - part 1
@@ -298,4 +298,4 @@ What's the point of all this FRP goodness on the Elm side if we can't take advan
 6. Now uncomment the `import socket from "./socket"` line in *web/static/js/app.js* to enable sockets on the JavaScript side.
 7. Visiting [http://localhost:4000](http://localhost:4000) again, it should look like this.
 
-  ![](https://www.dropbox.com/s/56dtikvikp3yy9e/Screenshot%202015-09-15%2021.37.49.png?dl=0)
+  ![Joined channel successfully](http://i.imgur.com/2PdLQPS.png)
