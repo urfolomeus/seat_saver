@@ -149,3 +149,9 @@ You should see something like this:
 11. If you point your browser to [http://localhost:4000](http://localhost:4000) now you should see something like this:
 
   ![Phoenix with Elm](https://www.dropbox.com/s/wv52p28uy7g73k3/Screenshot%202015-09-15%2019.48.30.png?dl=0)
+
+
+## 3. Simplifying the Phoenix templates
+
+I decided to cut away some of the cruft to make it easier to see what was going on. See the diff for details.
+
