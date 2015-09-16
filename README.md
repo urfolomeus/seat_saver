@@ -236,10 +236,7 @@ Rather than hardwire the seats we want to get them from the database. We'll star
 
 ## 6. Sending the initial seat data to the Elm app
 
-> This part is one where I've tried a few options and I'm not really happy with any of them. Basically I want to be able to start with the application showing the current state of the seats within the database. I'll then be using channels to reserve and unreserve seats so, once open, the application should update in real time across all users. Getting this initial state in has been a bit of an issue. I've tried pulling the data directly in Elm using elm-http but I can't seem to find out how to get this to happen on initializing the app, only when I take an action like click a button. Some more reading required I guess!
-> If you happen to find out how to do that, please let me know! :)
-
-We'll implement the initial loading of seat data by setting up an incoming port in Elm, making an AJAX request within *web/static/js/app.js* and then sending the resulting JSON data over the port to Elm. Ports allow you to send data between Elm and JavaScript. We'll send any errors to the browser console for now.
+We'll implement the initial loading of seat data by setting up an incoming port in Elm, making an AJAX request within *web/static/js/app.js* and then sending the resulting JSON data over the port to Elm. Ports allow you to send data between Elm and JavaScript. We'll send any errors to the browser console for now. This is just a halfway point until the next section when we introduce channels.
 
 See the diff for the details.
 
@@ -299,3 +296,46 @@ What's the point of all this FRP goodness on the Elm side if we can't take advan
 7. Visiting [http://localhost:4000](http://localhost:4000) again, it should look like this.
 
   ![Joined channel successfully](http://i.imgur.com/2PdLQPS.png)
+
+8. But we can do better than this. Let's load the initial application state (i.e. the list of seats) from the database into the Elm app. We'll start off by modifying our Seat model to be able to encode to JSON. At the very bottom of the *web/models/seat.ex* file, after the module definition add:
+
+  ```elixir
+  defimpl Poison.Encoder, for: SeatSaver.Seat do
+    def encode(model, opts) do
+      %{id: model.id,
+        seatNo: model.seat_no,
+        occupied: model.occupied} |> Poison.Encoder.encode(opts)
+    end
+  end
+  ```
+
+9. Open *web/channels/seat_channel.ex* and change it to the following:
+
+  ```elixir
+  defmodule SeatSaver.SeatChannel do
+    use SeatSaver.Web, :channel
+
+    import Ecto.Query
+
+    alias SeatSaver.Seat
+
+    def join("seats:planner", payload, socket) do
+      seats = (from s in Seat, order_by: [asc: s.seat_no]) |> Repo.all
+      {:ok, seats, socket}
+    end
+  end
+  ```
+
+10. Now replace the XHR code in *web/static/js/app.js* with:
+
+  ```javascript
+  let channel = socket.channel("seats:planner", {})
+  channel.join()
+    .receive("ok", seats => { elmApp.ports.seats.send(seats); })
+    .receive("error", resp => { console.log("Unable to join", resp) })
+  ```
+
+11. And comment out those same lines in *web/static/js/socket.js*
+12. Visiting [http://localhost:4000](http://localhost:4000) again, it should look like this.
+
+  ![Load data when joining channel]()

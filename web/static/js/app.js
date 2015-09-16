@@ -23,14 +23,7 @@ import socket from "./socket"
 var elmDiv = document.getElementById('elm-main'),
     elmApp = Elm.embed(Elm.SeatSaver, elmDiv, {seats: []});
 
-var xhr = new XMLHttpRequest();
-xhr.open('GET', encodeURI('api/seats'));
-xhr.onload = function() {
-  if (xhr.status === 200) {
-    var seats = JSON.parse(xhr.responseText).data;
-    elmApp.ports.seats.send(seats);
-  } else {
-    console.log(xhr);
-  }
-};
-xhr.send();
+let channel = socket.channel("seats:planner", {})
+channel.join()
+  .receive("ok", seats => { elmApp.ports.seats.send(seats); })
+  .receive("error", resp => { console.log("Unable to join", resp) })
