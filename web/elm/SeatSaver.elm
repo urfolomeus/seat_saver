@@ -4,10 +4,6 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 
 
-main =
-  Signal.map view model
-
-
 -- MODEL
 
 type alias Seat =
@@ -72,3 +68,6 @@ model : Signal Model
 model =
   Signal.foldp update initialModel actions
 
+
+main =
+  Signal.map view model
