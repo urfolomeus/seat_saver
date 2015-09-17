@@ -21,7 +21,7 @@ import "deps/phoenix_html/web/static/js/phoenix_html"
 import socket from "./socket"
 
 var elmDiv = document.getElementById('elm-main'),
-    elmApp = Elm.embed(Elm.SeatSaver, elmDiv, {seats: []});
+    elmApp = Elm.embed(Elm.SeatSaver, elmDiv, {seats: [], reserveSeat: 0});
 
 let channel = socket.channel("seats:planner", {})
 channel.join()
@@ -39,4 +39,5 @@ elmApp.ports.updateSeat.subscribe(function (seat) {
 
 channel.on("occupied", payload => {
   console.log('occupied seat', payload);
+  elmApp.ports.reserveSeat.send(payload.seatNo);
 });

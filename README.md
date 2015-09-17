@@ -481,3 +481,90 @@ We now have a port hooked up from our Elm app. We can take the data that is sent
 5. If you check your database too, your should see that the associated record has been updated too!
 
   ![Updating a seat via channels - database]()
+
+
+## 10. Reserving a seat - joining things up
+
+When the channel broadcasts that a seat has been occupied we currently just output to the console. What we need to do is tell Elm to update the seat on each subscriber's browser to show that it is now occupied. This being Elm we do that with signals via a port.
+
+1. We'll start by creating the port. In your *web/elm/SeatSaver.elm* add the following to the Ports section:
+
+  ```elm
+  port reserveSeat : Signal Int
+  ```
+
+2. Because this is an incoming port we need to give it an initial value when we initialize the Elm application. So over in *web/static/js/app.js* change the initializer line to take 0 as an initial seatNo (we'll not have a seat with this number).
+
+  ```javascript
+  elmApp = Elm.embed(Elm.SeatSaver, elmDiv, {seats: [], reserveSeat: 0});
+  ```
+
+3. We want to react to values coming in through this port and turn them into a signal of Actions that our Elm app can process. In the Signals section underneath the Mailbox that we added, add the following:
+
+  ```elm
+  seatReservations : Signal Action
+  seatReservations =
+    Signal.map (\seatNo -> Reserve seatNo) reserveSeat
+  ```
+
+4. For every value on the `reserveSeat` port we map it into a new signal of Actions by running an anonymous function that converts the value into a Reserve Action (with the seatNo).
+
+5. In order to be able to react to this Signal of Actions, we need to merge it with our existing actions. We do this by changing the definition of the `actions` function as follows:
+
+  ```elm
+  Signal.merge addSeats seatReservations
+  ```
+
+6. This merges our Signal of Actions from the existing `addSeats` Signal with our new Signal from `seatReservations`.
+7. Now we'll add a handler in our `update` function to handle the Reserve Action.
+
+  ```elm
+  -- UPDATE
+
+  type Action = NoOp | AddSeats Model | Reserve Int
+
+
+  update : Action -> Model -> Model
+  update action model =
+    case action of
+      NoOp ->
+        model
+      AddSeats seats ->
+        seats
+      Reserve seatNo ->
+        let
+          updateSeat s =
+            if s.seatNo == seatNo then { s | occupied <- True } else s
+        in
+          List.map updateSeat model
+  ```
+
+8. We added a type definition `Reserve Int` for our new Action and then defined the handler. The handler maps seats in the current model changing `occupied` to `True` if its `seatNo` matches the given seatNo.
+9. Now that we have a port, a signal and a handler in our `update` function we can hookup our JavaScript to use the port. In *web/static/js/app.js* change the `channel.on("occupied", ...)` handler to the following:
+
+  ```javascript
+  channel.on("occupied", payload => {
+    console.log('occupied seat', payload);
+    elmApp.ports.reserveSeat.send(payload.seatNo);
+  });
+  ```
+
+10. Let's fire up our phoenix server again, but this time we'll open two browser windows (use different browsers if you like).
+11. Now when we click on an unoccupied seat we'll see it update in both browsers. If we refresh either browser we should see the same state being displayed because it is being maintained in the database.
+
+  ![Updating a seat via channels - two browsers]()
+
+
+## Conclusion
+
+Phew! That's a lot to take in! I think we'll stop here for now. There's a ton of stuff we've not dealt with as far as this app is concerned. We've completely ignored at least:
+
+* Unreserving seats
+* Handling more than one user trying to book the same seat at the same time
+* Writing tests for our channel
+
+... and more.
+
+This was just intended as a sample to see the moving parts of Phoenix and Elm and we've mostly done that. I may revisit this application again later to add some of these missing features. Feel free to add them and PR if you like! :)
+
+

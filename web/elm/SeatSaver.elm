@@ -24,7 +24,7 @@ initialModel =
 
 -- UPDATE
 
-type Action = NoOp | AddSeats Model
+type Action = NoOp | AddSeats Model | Reserve Int
 
 
 update : Action -> Model -> Model
@@ -34,6 +34,12 @@ update action model =
       model
     AddSeats seats ->
       seats
+    Reserve seatNo ->
+      let
+        updateSeat s =
+          if s.seatNo == seatNo then { s | occupied <- True } else s
+      in
+        List.map updateSeat model
 
 
 -- VIEW
@@ -53,6 +59,9 @@ seatItem address seat =
 port seats : Signal Model
 
 
+port reserveSeat : Signal Int
+
+
 port updateSeat : Signal Seat
 port updateSeat =
   seatsToUpdate.signal
@@ -62,7 +71,7 @@ port updateSeat =
 
 actions : Signal Action
 actions =
-  addSeats
+  Signal.merge addSeats seatReservations
 
 
 addSeats : Signal Action
@@ -73,6 +82,11 @@ addSeats =
 seatsToUpdate : Signal.Mailbox Seat
 seatsToUpdate =
   Signal.mailbox (Seat 0 False)
+
+
+seatReservations : Signal Action
+seatReservations =
+  Signal.map (\seatNo -> Reserve seatNo) reserveSeat
 
 
 model : Signal Model
