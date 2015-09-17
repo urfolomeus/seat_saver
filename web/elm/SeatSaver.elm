@@ -46,12 +46,15 @@ update action model =
 
 view : Signal.Address Seat -> Model -> Html
 view address model =
-  ul [ ] ( List.map (seatItem address) model )
+  ul [ class "seats" ] ( List.map (seatItem address) model )
 
 
 seatItem : Signal.Address Seat -> Seat -> Html
 seatItem address seat =
-  li [ onClick address seat ] [ text (toString seat) ]
+  let
+    occupiedClass = if seat.occupied then "occupied" else "available"
+  in
+    li [ class ("seat " ++ occupiedClass), onClick address seat ] [ text (toString seat.seatNo) ]
 
 
 -- PORTS
