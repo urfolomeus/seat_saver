@@ -29,5 +29,14 @@ channel.join()
   .receive("error", resp => { console.log("Unable to join", resp) })
 
 elmApp.ports.updateSeat.subscribe(function (seat) {
-  console.log(seat);
+  var seatNo = seat.seatNo
+  console.log('Requesting seat ' + seatNo)
+  channel.push("request_seat", {seatNo: seatNo})
+         .receive("error", payload => {
+            console.log(payload.message);
+         })
+});
+
+channel.on("occupied", payload => {
+  console.log('occupied seat', payload);
 });

@@ -420,3 +420,64 @@ Open the *web/elm/SeatSaver.elm* file.
   ![Interop with clicks]()
 
 So we are now able to send a seat's data out to JavaScript when we click on it. In the next section we'll link that up to a channel so that we can send the seat data to the server to be persisted.
+
+
+## 9. Reserving a seat - setting up the channel
+
+We now have a port hooked up from our Elm app. We can take the data that is sent to us on this port and push it onto the channel so that we can send it to the server.
+
+1. Add the following to your *web/channels/seat_channel.ex* file.
+
+  ```elixir
+  def handle_in("request_seat", payload, socket) do
+    # sanity check out to the log in case things go awry!
+    IO.puts {:request_seat, payload} |> inspect
+
+    # fetch the requested seat from the database
+    seat = Repo.get!(SeatSaver.Seat, payload["seatNo"])
+
+    # create an update that will mark the seat as occupied
+    seat_params = %{"occupied" => true}
+    changeset = SeatSaver.Seat.changeset(seat, seat_params)
+
+    # run the update, if it was successful broadcast the seat that
+    # was occupied to all subscribers, otherwise reply to the originator
+    # with an error
+    case Repo.update(changeset) do
+      {:ok, seat} ->
+        broadcast socket, "occupied", payload
+        {:noreply, socket}
+      {:error, changeset} ->
+        {:reply, {:error, %{message: "Something went wrong"}}, socket}
+    end
+  end
+  ```
+
+2. Now we need to push to this handler from *web/static/js/app.js* and handle any error replies we get. For the purposes of this demo we'll just log them to the console.
+
+  ```javascript
+  elmApp.ports.updateSeat.subscribe(function (seat) {
+    var seatNo = seat.seatNo
+    console.log('Requesting seat ' + seatNo)
+    channel.push("request_seat", {seatNo: seatNo})
+           .receive("error", payload => {
+              console.log(payload.message);
+           })
+  });
+  ```
+
+3. And we also need to listen for broadcasts on the channel that tell us when the seat has been occupied. For now we'll just log this to the console too.
+
+  ```javascript
+  channel.on("occupied", payload => {
+    console.log('occupied seat', payload);
+  });
+  ```
+
+4. If we fire up a server, visit [http://localhost:4000](http://localhost:4000) and click on any of the seatItems we should see something like the following:
+
+  ![Updating a seat via channels - browser]()
+
+5. If you check your database too, your should see that the associated record has been updated too!
+
+  ![Updating a seat via channels - database]()
