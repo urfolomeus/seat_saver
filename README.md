@@ -245,7 +245,7 @@ You should now see the following in your browser:
 ![Getting initial seats via ports](http://i.imgur.com/gbzIr8b.png)
 
 
-## 7. Adding Phoenix channels - part 1
+## 7. Adding Phoenix channels
 
 What's the point of all this FRP goodness on the Elm side if we can't take advantage with some real time goodness on the Phoenix side?
 
@@ -339,3 +339,84 @@ What's the point of all this FRP goodness on the Elm side if we can't take advan
 12. Visiting [http://localhost:4000](http://localhost:4000) again, it should look like this.
 
   ![Load data when joining channel]()
+
+
+## 8. Reserving a seat - interop with JavaScript
+
+Ok, so now we are able to load our initial model over channels when we join. Let's expand this so that we can reserve a seat over channels too. We'll start with the outgoing request.
+
+In order to convert click events in the View into events that JavaScript can process we need three things:
+
+  1. A Mailbox in our Elm application to send click events to. A Mailbox in Elm allows us to send values to a Signal. You can read more about them on the [Elm Reactivity Guide](http://elm-lang.org/guide/reactivity).
+  2. An outgoing Port in our  Elm application that will send any values that appear on the Mailbox out to JavaScript.
+  3. A subscriber to that port in our JavaScript that attaches a callback function that should fire whenever a value is received on that port.
+
+Open the *web/elm/SeatSaver.elm* file.
+
+1. Let's set up the Mailbox first. This needs to receive Seat records so the definition looks like this:
+
+  ```elm
+  -- SIGNALS
+
+  seatsToUpdate : Signal.Mailbox Seat
+  seatsToUpdate =
+    Signal.mailbox (Seat 0 False)
+  ```
+
+2. Now we can send click events to this Mailbox by passing it's address into the View from the `main` function.
+
+  ```elm
+  main =
+    Signal.map (view seatsToUpdate.address) model
+  ```
+
+3. And then using it in the View.
+
+  ```elm
+  -- VIEW
+
+  view : Signal.Address Seat -> Model -> Html
+  view address model =
+    ul [ ] ( List.map (seatItem address) model )
+
+
+  seatItem : Signal.Address Seat -> Seat -> Html
+  seatItem address seat =
+    li [ onClick address seat ] [ text (toString seat) ]
+  ```
+
+4. We'll need to add an import for the `HTML.Events` module so that we can access the onclick` function.
+
+  ```elm
+  import Html.Events exposing (..)
+  ```
+
+5. We need an outgoing port that will let us watch for values appearing on the Mailbox's signal and send them out to JavaScript.
+
+  ```elm
+  -- PORTS
+
+  ...
+
+  port updateSeat : Signal Seat
+  port updateSeat =
+    seatsToUpdate.signal
+  ```
+
+6. The last piece of the puzzle is to subscribe to this port in our *web/static/js/app.js* file.
+
+  ```javascript
+  elmApp.ports.updateSeat.subscribe(function (seat) {
+    console.log(seat);
+  });
+  ```
+
+7. We'll start by just outputting what we get to the console so we can take a peek. If you fire up a Phoenix server and visit [http://localhost:4000](http://localhost:4000) you should see something that looks like this:
+
+  ![Interop no clicks yet]()
+
+8. Clicking on any of the seats should output that Seat's JSON representation to the console.
+
+  ![Interop with clicks]()
+
+So we are now able to send a seat's data out to JavaScript when we click on it. In the next section we'll link that up to a channel so that we can send the seat data to the server to be persisted.

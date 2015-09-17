@@ -2,6 +2,7 @@ module SeatSaver where
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 
 
 -- MODEL
@@ -37,19 +38,24 @@ update action model =
 
 -- VIEW
 
-view : Model -> Html
-view model =
-  ul [ ] ( List.map seatItem model )
+view : Signal.Address Seat -> Model -> Html
+view address model =
+  ul [ ] ( List.map (seatItem address) model )
 
 
-seatItem : Seat -> Html
-seatItem seat =
-  li [ ] [ text (toString seat) ]
+seatItem : Signal.Address Seat -> Seat -> Html
+seatItem address seat =
+  li [ onClick address seat ] [ text (toString seat) ]
 
 
 -- PORTS
 
 port seats : Signal Model
+
+
+port updateSeat : Signal Seat
+port updateSeat =
+  seatsToUpdate.signal
 
 
 -- SIGNALS
@@ -64,10 +70,15 @@ addSeats =
   Signal.map AddSeats seats
 
 
+seatsToUpdate : Signal.Mailbox Seat
+seatsToUpdate =
+  Signal.mailbox (Seat 0 False)
+
+
 model : Signal Model
 model =
   Signal.foldp update initialModel actions
 
 
 main =
-  Signal.map view model
+  Signal.map (view seatsToUpdate.address) model

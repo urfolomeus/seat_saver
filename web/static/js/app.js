@@ -27,3 +27,7 @@ let channel = socket.channel("seats:planner", {})
 channel.join()
   .receive("ok", seats => { elmApp.ports.seats.send(seats); })
   .receive("error", resp => { console.log("Unable to join", resp) })
+
+elmApp.ports.updateSeat.subscribe(function (seat) {
+  console.log(seat);
+});
