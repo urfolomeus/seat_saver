@@ -21,17 +21,18 @@ initialModel : Model
 initialModel =
   []
 
+initialSeat : Seat
+initialSeat =
+    Seat 0 False
 
 -- UPDATE
 
-type Action = NoOp | AddSeats Model | Reserve Int
+type Action = AddSeats Model | Reserve Int
 
 
 update : Action -> Model -> Model
 update action model =
   case action of
-    NoOp ->
-      model
     AddSeats seats ->
       seats
     Reserve seatNo ->
@@ -59,7 +60,7 @@ seatItem address seat =
 
 -- PORTS
 
-port seats : Signal Model
+port seats : Signal (List Seat)
 
 
 port reserveSeat : Signal Int
@@ -74,23 +75,15 @@ port updateSeat =
 
 actions : Signal Action
 actions =
-  Signal.merge addSeats seatReservations
-
-
-addSeats : Signal Action
-addSeats =
-  Signal.map AddSeats seats
+  Signal.mergeMany [
+      Signal.map AddSeats seats
+    , Signal.map Reserve reserveSeat
+    ]
 
 
 seatsToUpdate : Signal.Mailbox Seat
 seatsToUpdate =
-  Signal.mailbox (Seat 0 False)
-
-
-seatReservations : Signal Action
-seatReservations =
-  Signal.map (\seatNo -> Reserve seatNo) reserveSeat
-
+  Signal.mailbox initialSeat
 
 model : Signal Model
 model =
