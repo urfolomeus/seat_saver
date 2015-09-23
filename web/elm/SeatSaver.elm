@@ -27,13 +27,13 @@ initialSeat =
 
 -- UPDATE
 
-type Action = AddSeats Model | Reserve Int
+type Action = SetupSeats (List Seat) | Reserve Int
 
 
 update : Action -> Model -> Model
 update action model =
   case action of
-    AddSeats seats ->
+    SetupSeats seats ->
       seats
     Reserve seatNo ->
       let
@@ -76,7 +76,7 @@ port updateSeat =
 actions : Signal Action
 actions =
   Signal.mergeMany [
-      Signal.map AddSeats seats
+      Signal.map SetupSeats seats
     , Signal.map Reserve reserveSeat
     ]
 
