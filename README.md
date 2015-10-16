@@ -1,3 +1,9 @@
+# PLEASE NOTE - IMPORTANT
+
+> Thanks all for the interest in this wee tutorial! I've now started to rework it over on the account for the company I work for. Please follow <https://github.com/CultivateHQ/seat_saver> for further updates.
+> I'll keep this here for now but will be deprecating in favour of the new one soon.
+
+
 # Notes
 
 This a demo app that uses [Phoenix](http://www.phoenixframework.org/) to serve data and [Elm](http://elm-lang.org) to display it in the browser. The following are the notes on how to repeat this yourself. There will be blog post out soon that goes into a bit more detail, so the instructions that follow are pretty bare bones.
