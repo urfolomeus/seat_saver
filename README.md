@@ -4,6 +4,11 @@
 > I'll keep this here for now but will be deprecating in favour of the new one soon.
 
 
+<br>
+<br>
+<br>
+<hr>
+
 # Notes
 
 This a demo app that uses [Phoenix](http://www.phoenixframework.org/) to serve data and [Elm](http://elm-lang.org) to display it in the browser. The following are the notes on how to repeat this yourself. There will be blog post out soon that goes into a bit more detail, so the instructions that follow are pretty bare bones.
