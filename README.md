@@ -68,7 +68,7 @@ You should see something like this:
     elm package install evancz/elm-html -y
   ```
 
-3. Create a file called *SeatSaver.elm* in the *web/elm* folder and add the following:
+3. Create a file called *SeatSaver.elm* in the *web/elm/src* folder and add the following:
 
   ```elm
   module SeatSaver where
@@ -113,7 +113,8 @@ You should see something like this:
     watched: [
       ...
       "test/static",
-      "web/elm/SeatSaver.elm"
+      "web/elm/elm-package.elm",
+      "web/elm/src"
     ],
     ...
   },
@@ -123,14 +124,26 @@ You should see something like this:
   plugins: {
     elmBrunch: {
       elmFolder: 'web/elm',
-      mainModules: ['SeatSaver.elm'],
+      mainModules: ['./src/SeatSaver.elm'],
       outputFolder: '../static/vendor'
     },
     ...
   },
   ```
 
-8. Change *web/templates/page/index.html.eex* to the following
+8. Edit your *web/elm/elm-package.json* file as follows:
+
+    ```javascript
+    {
+        ...
+        "source-directories": [
+            "src"
+        ],
+        ...
+    }
+    ```
+
+9. Change *web/templates/page/index.html.eex* to the following
 
   ```html.eex
   <div class="jumbotron">
@@ -142,7 +155,7 @@ You should see something like this:
   </div>
   ```
 
-9. And add the following to *web/static/js/app/js*:
+10. And add the following to *web/static/js/app/js*:
 
   ```JavaScript
   ...
@@ -150,14 +163,14 @@ You should see something like this:
       elmApp = Elm.embed(Elm.SeatSaver, elmDiv);
   ```
 
-10. Firing up the Phoenix server again should build the Elm file and output the JavaScript to *web/static/vendor/seatsaver.js* (which will in turn get compiled into *priv/static/js/app.js*).
+11. Firing up the Phoenix server again should build the Elm file and output the JavaScript to *web/static/vendor/seatsaver.js* (which will in turn get compiled into *priv/static/js/app.js*).
 
   ```bash
   cd ../..
   iex -S mix phoenix.server
   ```
 
-11. If you point your browser to [http://localhost:4000](http://localhost:4000) now you should see something like this:
+12. If you point your browser to [http://localhost:4000](http://localhost:4000) now you should see something like this:
 
   ![Phoenix with Elm](http://i.imgur.com/SuZIMwD.png)
 
