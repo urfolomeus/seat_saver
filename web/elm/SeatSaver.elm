@@ -38,7 +38,7 @@ update action model =
     Reserve seatNo ->
       let
         updateSeat s =
-          if s.seatNo == seatNo then { s | occupied <- True } else s
+          if s.seatNo == seatNo then { s | occupied = True } else s
       in
         List.map updateSeat model
 
